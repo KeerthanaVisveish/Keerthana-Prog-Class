@@ -1,0 +1,29 @@
+Class Requirements
+
+The Arm class SHOULD HAVE ZERO STATES
+THERE SHOULD BE NO STATE MACHINE IN ARM
+
+Static variables:
+????
+I won't say because it depends on the control system you design
+
+Instance data:
+- armMotor
+- telemetry
+- targetAngle
+- anything else necessary for your control system
+
+The Arm class should have a constructor taking in HardwareMap and Telemetry
+It should:
+- initialize the armMotor
+- store telemetry as instance data
+- declare anything else necessary for your control system
+
+It should have an update function (takes 0 parameters)
+- Inside here, you should write your control algorithm
+- You should set the motor power to the output of your algorithm
+- Add telemetry calls for debugging
+
+It should have a setTargetAngle function
+- takes in 1 argument (double targetAngle)
+- sets target angle of arm to the argument

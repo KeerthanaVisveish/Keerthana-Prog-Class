@@ -1,0 +1,38 @@
+Class Requirements
+
+The Lift class SHOULD HAVE ZERO STATES
+THERE SHOULD BE NO STATE MACHINE IN LIFT
+
+Static variables:
+????
+I won't say because it depends on the control system you design
+
+Instance data:
+- liftMotor
+- telemetry
+- targetPos
+- anything else necessary for your control system
+
+The Lift class should have a constructor taking in HardwareMap and Telemetry
+It should:
+- initialize the liftMotor
+- store telemetry as instance data
+- declare anything else necessary for your control system
+
+It should have an update function (takes 0 parameters)
+- Inside here, you should write your control algorithm
+- You should set the motor power to the output of your algorithm
+- Add telemetry calls for debugging
+
+It should have a setTargetPos function
+- takes in 1 argument (double targetPos)
+- sets target pos of lift to argument
+
+CHALLENGE*****
+Assume that the string tension in your lift is affecting its stability
+You cannot have 1 single kG value anymore; you need different values based on the lift's current height
+
+Task:
+Create an InterpLUT (datatype for an interpolated lookup table):
+- input is lift position
+- output is a custom tuned kG (you won't actually tune these values, in this hypothetical, you will tune them later)

@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.subsystems.Arm;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+@Config
 public class ArmHW {
     private final DcMotorEx armMotor;
     private final Telemetry telemetry;
     private final PIDController pidController;
-    private double kP = 0, kI = 0, kD = 0;
-    private double kG = 0, ks = 0;
+    public static double kP = 0, kI = 0, kD = 0;
+    public static double kG = 0, ks = 0;
     private final int radsPerTick = 0;
     private double targetAngle = 0;
 
@@ -20,7 +22,7 @@ public class ArmHW {
         this.telemetry = telemetry;
     }
 
-    private double getCurrentArmPosition() {return armMotor.getCurrentPosition();}
+    public double getCurrentArmPosition() {return armMotor.getCurrentPosition();}
 
     private void update() {
         double currentAngle = getCurrentArmPosition() * radsPerTick;
@@ -32,7 +34,7 @@ public class ArmHW {
         armMotor.setPower(power);
     }
 
-    private void setTargetAngle(double desiredAngle) { // angle in rads
+    public void setTargetAngle(double desiredAngle) { // angle in rads
         targetAngle = desiredAngle;
     }
 }

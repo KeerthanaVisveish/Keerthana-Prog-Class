@@ -4,6 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
@@ -13,7 +15,7 @@ public class ArmHW {
     private final PIDController pidController;
     public static double kP = 0, kI = 0, kD = 0;
     public static double kG = 0, ks = 0;
-    private final int radsPerTick = 0;
+    private final int radsPerTick = 0; // get from specs, don't tune
     private double targetAngle = 0;
 
     public ArmHW(HardwareMap hwMap, Telemetry telemetry) {
@@ -24,12 +26,18 @@ public class ArmHW {
 
     public double getCurrentArmPosition() {return armMotor.getCurrentPosition();}
 
-    private void update() {
+    public void update(double batteryVoltage) {
+        pidController.setPID(kP, kI, kD);
         double currentAngle = getCurrentArmPosition() * radsPerTick;
-        double feedForward = Math.signum(targetAngle - currentAngle) * ks;
-        double feedBack = pidController.calculate(currentAngle, targetAngle);
-        double gravityFeedForward = kG * Math.cos(currentAngle);
-        double power = feedForward + feedBack + gravityFeedForward;
+
+        double feedForwardVoltage = Math.signum(targetAngle - currentAngle) * ks;
+        double feedBackVoltage = pidController.calculate(currentAngle, targetAngle);
+        double gravityFeedForwardVoltage = kG * Math.cos(currentAngle);
+
+        double voltage = feedForwardVoltage + feedBackVoltage + gravityFeedForwardVoltage;
+        double power = voltage / batteryVoltage;
+
+        power = Range.clip(power, -1, 1);
         telemetry.addData("Arm Target Power: ", power);
         armMotor.setPower(power);
     }

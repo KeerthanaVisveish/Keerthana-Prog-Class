@@ -33,12 +33,15 @@ public class LiftHW {
 
     public double getCurrentLiftPosition() {return liftMotor.getCurrentPosition();}
 
-    private void update() {
+    public void update(double batteryVoltage) {
         double currentPos = getCurrentLiftPosition();
-        double feedForward = Math.signum(targetPosition - currentPos) * ks;
-        double feedBack = pidController.calculate(currentPos, targetPosition);
-        double gravityFeedForward = kGLookup.get(currentPos);
-        double power = feedForward + feedBack + gravityFeedForward;
+
+        double feedForwardVoltage = Math.signum(targetPosition - currentPos) * ks;
+        double feedBackVoltage = pidController.calculate(currentPos, targetPosition);
+        double gravityFeedForwardVoltage = kGLookup.get(currentPos);
+
+        double voltage = feedForwardVoltage + feedBackVoltage + gravityFeedForwardVoltage;
+        double power = voltage / batteryVoltage;
         telemetry.addData("Lift Target Power: ", power);
         liftMotor.setPower(power);
     }

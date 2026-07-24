@@ -14,8 +14,10 @@ public class LiftHW {
     private final PIDController pidController;
     public static double kP = 0, kI = 0, kD = 0;
     public static double ks = 0;
+    public static double dampeningBand = 1;
     private double targetPosition;
     private InterpLUT kGLookup = new InterpLUT();
+    private double batteryVoltage = 13;
 
     public LiftHW(HardwareMap hwMap, Telemetry telemetry) {
         liftMotor = hwMap.get(DcMotorEx.class, "lift");
@@ -33,11 +35,14 @@ public class LiftHW {
 
     public double getCurrentLiftPosition() {return liftMotor.getCurrentPosition();}
 
-    public void update(double batteryVoltage) {
+    public void update() {
         double currentPos = getCurrentLiftPosition();
+        double error = targetPosition - currentPos;
 
-        double feedForwardVoltage = Math.signum(targetPosition - currentPos) * ks;
-        double feedBackVoltage = pidController.calculate(currentPos, targetPosition);
+        double scale = Math.min(1, Math.abs(error) / dampeningBand);
+
+        double feedForwardVoltage = Math.signum(error) * ks * scale;
+        double feedBackVoltage = pidController.calculate(currentPos, targetPosition) * scale;
         double gravityFeedForwardVoltage = kGLookup.get(currentPos);
 
         double voltage = feedForwardVoltage + feedBackVoltage + gravityFeedForwardVoltage;
@@ -45,7 +50,10 @@ public class LiftHW {
         telemetry.addData("Lift Target Power: ", power);
         liftMotor.setPower(power);
     }
-    public void setTargetAngle(double desiredPosition) {
+
+    public void setBatteryVoltage(double voltage) {batteryVoltage = voltage;}
+
+    public void setTargetPosition(double desiredPosition) {
         targetPosition = desiredPosition;
     }
 }

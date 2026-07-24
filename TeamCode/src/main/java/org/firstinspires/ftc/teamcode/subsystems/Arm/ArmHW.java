@@ -15,23 +15,30 @@ public class ArmHW {
     private final PIDController pidController;
     public static double kP = 0, kI = 0, kD = 0;
     public static double kG = 0, ks = 0;
+    public static double deadbandRadians = 0;
     private final int radsPerTick = 0; // get from specs, don't tune
     private double targetAngle = 0;
+    private double batteryVoltage = 13;
 
     public ArmHW(HardwareMap hwMap, Telemetry telemetry) {
+        this.telemetry = telemetry;
         armMotor = hwMap.get(DcMotorEx.class, "arm");
         pidController = new PIDController(kP, kI, kD);
-        this.telemetry = telemetry;
     }
 
-    public double getCurrentArmPosition() {return armMotor.getCurrentPosition();}
-
-    public void update(double batteryVoltage) {
+    public void update() {
         pidController.setPID(kP, kI, kD);
         double currentAngle = getCurrentArmPosition() * radsPerTick;
+        double error = targetAngle - currentAngle;
 
-        double feedForwardVoltage = Math.signum(targetAngle - currentAngle) * ks;
+        double feedForwardVoltage = Math.signum(error) * ks;
         double feedBackVoltage = pidController.calculate(currentAngle, targetAngle);
+
+        if (Math.abs(error) < deadbandRadians) {
+            feedForwardVoltage = 0;
+            feedBackVoltage = 0;
+        }
+
         double gravityFeedForwardVoltage = kG * Math.cos(currentAngle);
 
         double voltage = feedForwardVoltage + feedBackVoltage + gravityFeedForwardVoltage;
@@ -41,6 +48,10 @@ public class ArmHW {
         telemetry.addData("Arm Target Power: ", power);
         armMotor.setPower(power);
     }
+
+    public double getCurrentArmPosition() {return armMotor.getCurrentPosition();}
+
+    public void setBatteryVoltage(double voltage) {batteryVoltage = voltage;}
 
     public void setTargetAngle(double desiredAngle) { // angle in rads
         targetAngle = desiredAngle;
